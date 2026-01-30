@@ -3,7 +3,7 @@
 class PixelArtDatabase {
     constructor() {
         this.dbName = 'PixelArtDB_Advanced';
-        this.dbVersion = 3;
+        this.dbVersion = 6;
         this.db = null;
         this.initialized = false;
     }
