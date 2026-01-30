@@ -124,16 +124,36 @@ class PixelArtApp {
         appContainer.style.display = 'block';
     }
     
-    // السطر 146 في app.js - التعديل المطلوب:
-async initDatabase() {
+    async initDatabase() {
     try {
-        // تهيئة IndexedDB
-        // الصحيح: استدعاء init من الكائن database
-        await window.db.init();
-        console.log('تم تهيئة قاعدة البيانات بنجاح');
+        // الانتظار قليلاً للتأكد من تحميل جميع الملفات
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // التحقق من وجود window.db
+        if (!window.db) {
+            console.warn('window.db غير موجود، جاري إنشاء نسخة جديدة...');
+            window.db = new PixelArtDatabase();
+        }
+        
+        // التحقق من وجود دالة init
+        if (window.db && typeof window.db.init === 'function') {
+            await window.db.init();
+            console.log('تم تهيئة قاعدة البيانات بنجاح');
+        } else {
+            throw new Error('كائن قاعدة البيانات غير صالح');
+        }
     } catch (error) {
         console.error('فشل تهيئة قاعدة البيانات:', error);
-        this.showError('فشل تهيئة قاعدة البيانات', error.message);
+        
+        // محاولة إنشاء نسخة احتياطية
+        try {
+            window.db = new PixelArtDatabase();
+            await window.db.init();
+            console.log('تم تهيئة قاعدة البيانات باستخدام النسخة الاحتياطية');
+        } catch (backupError) {
+            this.showError('فشل تهيئة قاعدة البيانات', 
+                'تعذر الاتصال بقاعدة البيانات المحلية. يرجى تحديث الصفحة.');
+        }
     }
 }
     
